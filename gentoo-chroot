@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Check user is root
+if [ $(whoami) != root ]; then
+  echo "Please run the script as root"
+  exit 1
+fi
+
 # Make script to be executed in chroot
 chroot-script () {
   cat >$1/chroot-script.sh <<'EOF'
