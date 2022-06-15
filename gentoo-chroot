@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Make script to be executed in chroot
+chroot-script () {
+  cat >$1/chroot-script.sh <<'EOF'
+#!/bin/bash
+source /etc/profile
+export PS1="(chroot) ${PS1}"
+rm -f /chroot-script.sh
+EOF
+}
+
+# Mount all the gentoo directories
+mount-everything () {
+  mount --types proc /proc $1/proc
+  mount --rbind /sys $1/sys
+  mount --make-rslave $1/sys
+  mount --rbind /dev $1/dev
+  mount --make-rslave $1/dev
+  chroot $1 ./chroot-script.sh
+}
+
+# Check there is an argument passed to the script; if so, use it as mount point; otherwise, exit as failure
+if [ -n $1 ]; then
+  chroot-script
+  mount-everything
+else
+  echo "Please specify the directory to chroot into."
+  exit 1
+fi
